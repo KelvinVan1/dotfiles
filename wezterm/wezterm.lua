@@ -61,11 +61,26 @@ function readjust_font_size(window, pane)
 	end
 end
 
+-- Checks if current OS is windows based on path seperator
+function is_windows()
+	return package.config:sub(1, 1) == "\\"
+end
+
 -- Pulls a random image's path from the defined folder and returns it
 function randomize_image()
-	local directory = wezterm.home_dir .. '/.config/wezterm/backgrounds/'
+	local directory = ""
+	local command = ""
 	local images = {}
-	for fName in io.popen("ls " .. directory):lines() do
+
+	if is_windows() then
+		directory = wezterm.home_dir .. "\\.config\\wezterm\\backgrounds\\"
+		command = "dir /b "
+	else
+		directory = wezterm.home_dir .. "/.config/wezterm/backgrounds/"
+		command = "ls "
+	end
+
+	for fName in io.popen(command .. directory):lines() do
 		table.insert(images, directory .. fName)
 	end
 	return images[math.random(1, #images)]
@@ -101,7 +116,7 @@ function toggle_background(window, pane)
 				width = "100%",
 				height = "100%",
 				opacity = 0.55,
-			}
+			},
 		}
 	else
 		overrides.window_background_opacity = nil
